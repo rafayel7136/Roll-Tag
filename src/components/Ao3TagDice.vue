@@ -1,244 +1,167 @@
-<template>
-  <section class="ao3-dice">
-    <header class="header">
-      <h1>AO3 Tag Dice</h1>
-      <p>按 preset 过滤，按维度随机抽取。只需维护 JSON 即可扩展。</p>
-    </header>
-
-    <div class="controls">
-      <label class="preset-select">
-        <span>模式</span>
-        <select v-model="activePresetKey" @change="rollAll">
-          <option v-for="preset in presets" :key="preset.key" :value="preset.key">
-            {{ preset.name }}
-          </option>
-        </select>
-      </label>
-      <p class="preset-description">{{ activePreset?.description }}</p>
-      <div class="actions">
-        <button type="button" @click="rollAll">整体 Roll</button>
-        <button type="button" @click="copyResult" :disabled="!resultLines.length">
-          {{ copyStatus }}
-        </button>
-      </div>
-    </div>
-
-    <ul class="result-list">
-      <li v-for="dimension in dimensions" :key="dimension.key" class="result-card">
-        <div class="card-header">
-          <strong>{{ dimension.name }}</strong>
-          <button type="button" @click="rerollDimension(dimension.key)">重 Roll</button>
-        </div>
-
-        <div v-if="pickedTagsByDimension[dimension.key]?.length" class="card-body">
-          <div
-            v-for="tag in pickedTagsByDimension[dimension.key]"
-            :key="`${dimension.key}-${tag.ao3Tag}`"
-            class="tag-line"
-          >
-            <span class="label">{{ tag.label }}</span>
-            <code>{{ tag.ao3Tag }}</code>
-          </div>
-        </div>
-        <p v-else class="empty">当前模式下该维度没有可用 tag</p>
-      </li>
-    </ul>
-  </section>
-</template>
-
 <script setup>
 import { computed, ref } from 'vue'
 import tagPool from '../data/tagPool.json'
 
-const presets = tagPool.presets ?? []
-const dimensions = tagPool.dimensions ?? []
-
-const activePresetKey = ref(presets[0]?.key ?? 'free')
-const pickedTagsByDimension = ref({})
-const copyStatus = ref('复制结果')
-
-const activePreset = computed(() => presets.find((preset) => preset.key === activePresetKey.value))
-
-const pickRandom = (tags, count = 1) => {
-  if (!Array.isArray(tags) || tags.length === 0) return []
-  const pool = [...tags]
-  const max = Math.min(Math.max(count, 1), pool.length)
-  const result = []
-
-  for (let i = 0; i < max; i += 1) {
-    const index = Math.floor(Math.random() * pool.length)
-    result.push(pool[index])
-    pool.splice(index, 1)
-  }
-
-  return result
+const presetMap = {
+  全维度: ['scene', 'emotion', 'relationship', 'action', 'limit', 'intensity'],
+  情绪流: ['scene', 'emotion', 'relationship', 'intensity'],
+  行动流: ['scene', 'action', 'limit', 'intensity'],
 }
 
-const getFilteredTags = (dimension) => {
-  const tags = Array.isArray(dimension.tags) ? dimension.tags : []
-  if (activePresetKey.value === 'free') return tags
+const currentPreset = ref('全维度')
+const result = ref({})
+const copied = ref(false)
 
-  return tags.filter((tag) => Array.isArray(tag.presets) && tag.presets.includes(activePresetKey.value))
-}
-
-const rollDimension = (dimension) => {
-  const filteredTags = getFilteredTags(dimension)
-  return pickRandom(filteredTags, Number(dimension.count) || 1)
-}
-
-const rollAll = () => {
-  const next = {}
-  dimensions.forEach((dimension) => {
-    next[dimension.key] = rollDimension(dimension)
-  })
-  pickedTagsByDimension.value = next
-  copyStatus.value = '复制结果'
-}
-
-const rerollDimension = (dimensionKey) => {
-  const dimension = dimensions.find((item) => item.key === dimensionKey)
-  if (!dimension) return
-
-  pickedTagsByDimension.value = {
-    ...pickedTagsByDimension.value,
-    [dimensionKey]: rollDimension(dimension)
-  }
-  copyStatus.value = '复制结果'
-}
-
-const resultLines = computed(() => {
-  return dimensions
-    .flatMap((dimension) => {
-      const tags = pickedTagsByDimension.value[dimension.key] ?? []
-      return tags.map((tag) => `${dimension.name}: ${tag.label} | ${tag.ao3Tag}`)
-    })
-    .filter(Boolean)
+const activeKeys = computed(() => {
+  return presetMap[currentPreset.value] || Object.keys(tagPool.dimensions)
 })
 
-const copyResult = async () => {
-  if (!resultLines.value.length) return
-
-  try {
-    await navigator.clipboard.writeText(resultLines.value.join('\n'))
-    copyStatus.value = '已复制'
-  } catch {
-    copyStatus.value = '复制失败'
-  }
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)]
 }
 
-rollAll()
+function roll() {
+  const next = {}
+
+  activeKeys.value.forEach((key) => {
+    const group = tagPool.dimensions[key]
+
+    if (group && Array.isArray(group.tags) && group.tags.length > 0) {
+      next[key] = {
+        label: group.label,
+        tag: pickRandom(group.tags),
+      }
+    }
+  })
+
+  result.value = next
+  copied.value = false
+}
+
+const resultText = computed(() => {
+  return Object.values(result.value)
+    .map((item) => `${item.label}：${item.tag}`)
+    .join('\n')
+})
+
+async function copyResult() {
+  if (!resultText.value) return
+
+  await navigator.clipboard.writeText(resultText.value)
+  copied.value = true
+
+  setTimeout(() => {
+    copied.value = false
+  }, 1200)
+}
+
+roll()
 </script>
 
+<template>
+  <section class="dice">
+    <div class="toolbar">
+      <label class="preset">
+        Preset
+        <select v-model="currentPreset" @change="roll">
+          <option v-for="(_, name) in presetMap" :key="name" :value="name">
+            {{ name }}
+          </option>
+        </select>
+      </label>
+
+      <button @click="roll">重新 Roll</button>
+      <button :disabled="!resultText" @click="copyResult">
+        {{ copied ? '已复制' : '复制结果' }}
+      </button>
+    </div>
+
+    <div v-if="Object.keys(result).length" class="card">
+      <div v-for="(item, key) in result" :key="key" class="tag-row">
+        <span class="label">{{ item.label }}</span>
+        <span class="tag">{{ item.tag }}</span>
+      </div>
+    </div>
+
+    <p v-else class="empty">
+      还没有读到可用 tag。检查 tagPool.json 格式。
+    </p>
+  </section>
+</template>
+
 <style scoped>
-.ao3-dice {
-  max-width: 860px;
-  margin: 24px auto;
-  padding: 20px;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #1f2937;
+.dice {
+  margin-top: 24px;
 }
 
-.header h1 {
-  margin: 0;
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-.header p {
-  margin-top: 8px;
-  color: #4b5563;
-}
-
-.controls {
-  margin-top: 18px;
-  padding: 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #f9fafb;
-}
-
-.preset-select {
-  display: grid;
+.preset {
+  display: flex;
+  align-items: center;
   gap: 8px;
   font-weight: 600;
 }
 
-.preset-select select {
-  max-width: 220px;
-  padding: 8px 10px;
+select,
+button {
   border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #fff;
-}
-
-.preset-description {
-  margin: 10px 0 0;
-  color: #6b7280;
-}
-
-.actions {
-  margin-top: 12px;
-  display: flex;
-  gap: 10px;
+  border-radius: 12px;
+  background: white;
+  padding: 10px 14px;
+  font-size: 15px;
 }
 
 button {
-  border: 1px solid #d1d5db;
-  background: white;
-  border-radius: 8px;
-  padding: 8px 12px;
   cursor: pointer;
+}
+
+button:hover {
+  transform: translateY(-1px);
 }
 
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: 0.45;
 }
 
-.result-list {
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 12px;
-}
-
-.result-card {
+.card {
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 12px;
-  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
 }
 
-.card-header {
+.tag-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.card-body {
-  margin-top: 10px;
-  display: grid;
-  gap: 8px;
-}
-
-.tag-line {
-  display: grid;
-  gap: 3px;
+.tag-row:last-child {
+  border-bottom: none;
 }
 
 .label {
+  min-width: 90px;
+  font-weight: 700;
+  color: #4b5563;
+}
+
+.tag {
+  text-align: right;
   font-weight: 600;
 }
 
-code {
-  background: #f3f4f6;
-  border-radius: 6px;
-  padding: 4px 6px;
-  width: fit-content;
-}
-
 .empty {
-  margin: 10px 0 0;
-  color: #9ca3af;
+  color: #6b7280;
 }
 </style>
