@@ -1,0 +1,224 @@
+{
+  "version": 1,
+  "presets": [
+    {
+      "key": "free",
+      "name": "自由 Roll",
+      "description": "从全部 tag 池里随机抽取"
+    },
+    {
+      "key": "fluff",
+      "name": "甜饼模式",
+      "description": "偏轻松、亲密、治愈"
+    },
+    {
+      "key": "angst",
+      "name": "刀子模式",
+      "description": "偏拉扯、误会、压抑"
+    },
+    {
+      "key": "tension",
+      "name": "张力模式",
+      "description": "偏暧昧、占有、关系推拉"
+    },
+    {
+      "key": "explicit",
+      "name": "成人模式",
+      "description": "偏成年自愿亲密内容"
+    }
+  ],
+  "dimensions": [
+    {
+      "key": "scene",
+      "name": "场景",
+      "count": 1,
+      "tags": [
+        {
+          "label": "雨夜重逢",
+          "ao3Tag": "Rainy Night Reunion",
+          "presets": ["angst", "tension"]
+        },
+        {
+          "label": "同居日常",
+          "ao3Tag": "Domestic Fluff",
+          "presets": ["fluff"]
+        },
+        {
+          "label": "出差归来",
+          "ao3Tag": "Reunion After Separation",
+          "presets": ["fluff", "tension", "explicit"]
+        },
+        {
+          "label": "深夜卧室",
+          "ao3Tag": "Late Night Bedroom Scene",
+          "presets": ["tension", "explicit"]
+        },
+        {
+          "label": "浴室蒸汽",
+          "ao3Tag": "Shower Scene",
+          "presets": ["tension", "explicit"]
+        }
+      ]
+    },
+    {
+      "key": "mood",
+      "name": "情绪",
+      "count": 1,
+      "tags": [
+        {
+          "label": "甜蜜黏人",
+          "ao3Tag": "Soft Romance",
+          "presets": ["fluff"]
+        },
+        {
+          "label": "委屈求哄",
+          "ao3Tag": "Emotional Hurt/Comfort",
+          "presets": ["angst", "fluff"]
+        },
+        {
+          "label": "压抑克制",
+          "ao3Tag": "Repressed Feelings",
+          "presets": ["angst", "tension"]
+        },
+        {
+          "label": "占有欲",
+          "ao3Tag": "Possessive Behavior",
+          "presets": ["tension", "explicit"]
+        },
+        {
+          "label": "久别后失控",
+          "ao3Tag": "Emotional Reunion",
+          "presets": ["tension", "explicit"]
+        }
+      ]
+    },
+    {
+      "key": "relationship",
+      "name": "关系张力",
+      "count": 1,
+      "tags": [
+        {
+          "label": "双向暗恋",
+          "ao3Tag": "Mutual Pining",
+          "presets": ["fluff", "angst"]
+        },
+        {
+          "label": "已确立关系",
+          "ao3Tag": "Established Relationship",
+          "presets": ["fluff", "explicit"]
+        },
+        {
+          "label": "吃醋但不承认",
+          "ao3Tag": "Jealousy",
+          "presets": ["tension", "angst"]
+        },
+        {
+          "label": "控制与交付",
+          "ao3Tag": "Power Dynamics",
+          "presets": ["tension", "explicit"]
+        },
+        {
+          "label": "嘴硬心软",
+          "ao3Tag": "Denial of Feelings",
+          "presets": ["angst", "tension"]
+        }
+      ]
+    },
+    {
+      "key": "action",
+      "name": "动作",
+      "count": 1,
+      "tags": [
+        {
+          "label": "拥抱入睡",
+          "ao3Tag": "Cuddling &amp; Snuggling",
+          "presets": ["fluff"]
+        },
+        {
+          "label": "抵在门边亲吻",
+          "ao3Tag": "Kissing Against a Door",
+          "presets": ["tension", "explicit"]
+        },
+        {
+          "label": "对镜",
+          "ao3Tag": "Mirror Scene",
+          "presets": ["tension", "explicit"]
+        },
+        {
+          "label": "蒙眼",
+          "ao3Tag": "Blindfolds",
+          "presets": ["tension", "explicit"]
+        },
+        {
+          "label": "慢热亲密",
+          "ao3Tag": "Slow Intimacy",
+          "presets": ["fluff", "explicit"]
+        }
+      ]
+    },
+    {
+      "key": "constraint",
+      "name": "限制条件",
+      "count": 1,
+      "tags": [
+        {
+          "label": "只有一张床",
+          "ao3Tag": "There Was Only One Bed",
+          "presets": ["fluff", "tension"]
+        },
+        {
+          "label": "必须保持安静",
+          "ao3Tag": "Trying to Be Quiet",
+          "presets": ["tension", "explicit"]
+        },
+        {
+          "label": "手机突然响起",
+          "ao3Tag": "Interrupted Intimacy",
+          "presets": ["fluff", "tension"]
+        },
+        {
+          "label": "成年自愿",
+          "ao3Tag": "Consensual Relationship",
+          "presets": ["explicit", "tension", "fluff"]
+        },
+        {
+          "label": "误会未解",
+          "ao3Tag": "Misunderstandings",
+          "presets": ["angst"]
+        }
+      ]
+    },
+    {
+      "key": "intensity",
+      "name": "强度",
+      "count": 1,
+      "tags": [
+        {
+          "label": "清水",
+          "ao3Tag": "General Audiences",
+          "presets": ["fluff"]
+        },
+        {
+          "label": "暧昧拉扯",
+          "ao3Tag": "Sexual Tension",
+          "presets": ["tension"]
+        },
+        {
+          "label": "含蓄成人向",
+          "ao3Tag": "Mature",
+          "presets": ["tension", "explicit"]
+        },
+        {
+          "label": "明确成人向",
+          "ao3Tag": "Explicit Sexual Content",
+          "presets": ["explicit"]
+        },
+        {
+          "label": "情绪重口",
+          "ao3Tag": "Angst with a Happy Ending",
+          "presets": ["angst"]
+        }
+      ]
+    }
+  ]
+}
